@@ -1,14 +1,26 @@
+let taskBeingEdited = null;
+
 function addTask() {
   const input = document.getElementById("taskInput");
   const taskText = input.value.trim();
+  const addButton = document.querySelector("button");
 
   if (taskText === "") {
     alert("Please enter a task.");
     return;
   }
 
-  const list = document.getElementById("taskList");
+  // If editing an existing task
+  if (taskBeingEdited) {
+    taskBeingEdited.querySelector("span").textContent = taskText;
+    taskBeingEdited = null;
+    input.value = "";
+    addButton.textContent = "Add";
+    return;
+  }
 
+  // Add new task
+  const list = document.getElementById("taskList");
   const li = document.createElement("li");
 
   const span = document.createElement("span");
@@ -25,12 +37,9 @@ function addTask() {
   editBtn.className = "edit-btn";
   editBtn.innerHTML = "✏️";
   editBtn.onclick = function () {
-    const newText = prompt("Edit your task:", span.textContent);
-    if (newText === '') {
-      alert('Please write some thing!');
-    }
-    else
-      span.textContent = newText.trim();
+    input.value = span.textContent;
+    taskBeingEdited = li;
+    addButton.textContent = "Edit"; // 👈 Now it says "Edit" instead of "Add"
   };
 
   const deleteBtn = document.createElement("button");
@@ -38,6 +47,11 @@ function addTask() {
   deleteBtn.textContent = "✕";
   deleteBtn.onclick = function () {
     li.remove();
+    if (taskBeingEdited === li) {
+      taskBeingEdited = null;
+      input.value = "";
+      addButton.textContent = "Add";
+    }
   };
 
   li.appendChild(completeBtn);
@@ -48,3 +62,9 @@ function addTask() {
   list.appendChild(li);
   input.value = "";
 }
+
+document.getElementById("taskInput").addEventListener("keypress", function (e) {
+  if (e.key === "Enter") {
+    addTask();
+  }
+});
